@@ -1,7 +1,7 @@
 import axios from "axios";
 
 
-const api = axios.create({ baseURL: "https://smart-attend-hdhk.onrender.com/" });
+const api = axios.create({ baseURL: "https://smart-attend-1.onrender.com/api" });
 
 
 api.interceptors.request.use(config => {
