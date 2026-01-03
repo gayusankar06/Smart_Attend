@@ -1,11 +1,12 @@
 const mongoose = require("mongoose");
 
-
 const attendanceSchema = new mongoose.Schema({
-studentId: mongoose.Schema.Types.ObjectId,
-facultyId: mongoose.Schema.Types.ObjectId,
-date: { type: Date, default: Date.now }
+  studentId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  facultyId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  subject: String,
+  date: { type: Date, default: Date.now }
 });
 
-
-module.exports = mongoose.model("Attendance", attendanceSchema);
+module.exports =
+  mongoose.models.Attendance ||
+  mongoose.model("Attendance", attendanceSchema);

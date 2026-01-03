@@ -1,14 +1,11 @@
-const User = require("../models/User");
-const Attendance = require("../models/Attendance");
-
-exports.getPrincipalDashboard = async (req, res) => {
-  const students = await User.find({ role: "STUDENT" });
-  const attendance = await Attendance.find();
-
-  res.json({
-    totalStudents: students.length,
-    collegeAttendance: 86,
-    atRiskStudents: 45,
-    avgMarks: 82
-  });
+exports.getOverallAttendance = async (req, res) => {
+  res.json([
+    {
+      department: "CSE",
+      avgAttendance: 84,
+      atRisk: 22,
+      totalStudents: 420,
+      status: "Good"
+    }
+  ]);
 };

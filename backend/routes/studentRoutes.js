@@ -1,7 +1,13 @@
-const router = require("express").Router();
-const auth = require("../middleware/authMiddleware");
-const { getStudentDashboard } = require("../controllers/studentController");
+const express = require("express");
+const router = express.Router();
 
-router.get("/dashboard", auth, getStudentDashboard);
+const { getStudentAttendance } = require("../controllers/studentController");
+const authMiddleware = require("../middleware/authMiddleware");
+
+router.get(
+  "/attendance",
+  authMiddleware(["STUDENT"]),
+  getStudentAttendance
+);
 
 module.exports = router;

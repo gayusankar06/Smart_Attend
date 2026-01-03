@@ -1,11 +1,17 @@
 const mongoose = require("mongoose");
 
+const qrSessionSchema = new mongoose.Schema({
+  facultyId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
+  },
+  expiresAt: {
+    type: Date,
+    required: true
+  }
+}, { timestamps: true });
 
-const qrSchema = new mongoose.Schema({
-facultyId: mongoose.Schema.Types.ObjectId,
-token: String,
-expiresAt: Date
-});
-
-
-module.exports = mongoose.model("QrSession", qrSchema);
+module.exports =
+  mongoose.models.QRSession ||
+  mongoose.model("QRSession", qrSessionSchema);

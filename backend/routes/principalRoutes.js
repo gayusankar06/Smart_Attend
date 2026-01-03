@@ -1,16 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const Attendance = require("../models/Attendance");
-const authMiddleware = require("../middleware/authMiddleware");
+const auth = require("../middleware/authMiddleware");
+const { getOverallAttendance } = require("../controllers/principalController");
 
-
-router.get("/stats", authMiddleware, async (req, res) => {
-if (req.user.role !== "PRINCIPAL") return res.sendStatus(403);
-
-
-const total = await Attendance.countDocuments();
-res.json({ totalAttendance: total });
-});
-
+router.get("/attendance", auth, getOverallAttendance);
 
 module.exports = router;

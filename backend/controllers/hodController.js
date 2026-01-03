@@ -1,17 +1,16 @@
 const Attendance = require("../models/Attendance");
 const User = require("../models/User");
 
-exports.getHodDashboard = async (req, res) => {
-  const students = await User.find({ role: "STUDENT" });
-  const attendance = await Attendance.find();
+exports.getDepartmentAttendance = async (req, res) => {
+  try {
+    // Example: HOD can see all students attendance
+    const records = await Attendance.find()
+      .populate("studentId", "name email")
+      .populate("facultyId", "name email")
+      .sort({ date: -1 });
 
-  const avgAttendance = Math.round((attendance.length / 100) * 100);
-  const atRisk = students.filter(s => s.attendance < 75).length;
-
-  res.json({
-    totalStudents: students.length,
-    avgAttendance,
-    atRisk,
-    departmentRank: "82%"
-  });
+    res.json(records);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
 };

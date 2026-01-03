@@ -1,16 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const Attendance = require("../models/Attendance");
-const authMiddleware = require("../middleware/authMiddleware");
+const auth = require("../middleware/authMiddleware");
+const { getFacultyAttendance } = require("../controllers/facultyController");
 
-
-router.get("/attendance", authMiddleware, async (req, res) => {
-if (req.user.role !== "FACULTY") return res.sendStatus(403);
-
-
-const records = await Attendance.find({ facultyId: req.user.id });
-res.json(records);
-});
-
+router.get("/attendance", auth, getFacultyAttendance);
 
 module.exports = router;
