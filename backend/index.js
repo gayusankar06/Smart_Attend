@@ -1,16 +1,11 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-require("dotenv").config();
-require("./config/db");
-
-const authRoutes = require("./routes/authRoutes");
-const qrRoutes = require("./routes/qrRoutes");
-const studentRoutes = require("./routes/studentRoutes");
-const facultyRoutes = require("./routes/facultyRoutes");
-const hodRoutes = require("./routes/hodRoutes");
-const principalRoutes = require("./routes/principalRoutes");
+const connectDB = require("./config/db");
 
 const app = express();
+connectDB();
+
 app.use(cors());
 app.use(express.json());
 
@@ -18,13 +13,12 @@ app.get("/", (req, res) => {
   res.send("Backend running on 5000");
 });
 
-app.use("/api/auth", authRoutes);
-app.use("/api/qr", qrRoutes);
-app.use("/api/student", studentRoutes);
-app.use("/api/faculty", facultyRoutes);
-app.use("/api/hod", hodRoutes);
-app.use("/api/principal", principalRoutes);
+app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/qr", require("./routes/qrRoutes"));
+app.use("/api/student", require("./routes/studentRoutes"));
+app.use("/api/faculty", require("./routes/facultyRoutes"));
+app.use("/api/hod", require("./routes/hodRoutes"));
+app.use("/api/principal", require("./routes/principalRoutes"));
 
-app.listen(5000, () =>
-  console.log("Backend running on 5000")
-);
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Backend running on ${PORT}`));

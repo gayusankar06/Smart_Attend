@@ -1,9 +1,7 @@
-const express = require("express");
-const router = express.Router();
+const router = require("express").Router();
+const { createQrSession } = require("../controllers/qrController");
 const auth = require("../middleware/authMiddleware");
-const { generateQR, scanQR } = require("../controllers/qrController");
 
-router.post("/generate", auth, generateQR);
-router.post("/scan", auth, scanQR);
+router.post("/generate", auth("FACULTY"), createQrSession);
 
 module.exports = router;

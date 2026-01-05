@@ -1,12 +1,16 @@
 const mongoose = require("mongoose");
 
-const attendanceSchema = new mongoose.Schema({
-  studentId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  facultyId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  subject: String,
-  date: { type: Date, default: Date.now }
+const AttendanceSchema = new mongoose.Schema({
+  studentId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  facultyId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  sessionToken: { type: String, required: true },
+  markedAt: { type: Date, default: Date.now }
 });
 
-module.exports =
-  mongoose.models.Attendance ||
-  mongoose.model("Attendance", attendanceSchema);
+// Prevent duplicate attendance per session
+AttendanceSchema.index(
+  { studentId: 1, sessionToken: 1 },
+  { unique: true }
+);
+
+module.exports = mongoose.model("Attendance", AttendanceSchema);

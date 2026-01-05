@@ -1,36 +1,25 @@
-const jwt = require("jsonwebtoken");
-const QRSession = require("../models/QRSession");
-const Attendance = require("../models/Attendance");
+const QrSession = require("../models/QrSession");
+const crypto = require("crypto");
 
-exports.generateQR = async (req, res) => {
-  if (req.user.role !== "FACULTY")
-    return res.status(403).json("Only faculty allowed");
+exports.createQrSession = async (req, res) => {
+  try {
+    const token = `QR-${Date.now()}-${crypto.randomBytes(4).toString("hex")}`;
 
-  const qrToken = jwt.sign(
-    { facultyId: req.user.id },
-    process.env.JWT_SECRET,
-    { expiresIn: "5m" }
-  );
+    const session = await QrSession.create({
+      token,
+      facultyId: req.user.id,
+      expiresAt: new Date(Date.now() + 45 * 1000) // 45 seconds
+    });
 
-  await QRSession.create({
-    facultyId: req.user.id,
-    token: qrToken
-  });
-
-  res.json({ qrToken });
-};
-
-exports.scanQR = async (req, res) => {
-  const { token } = req.body;
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-  if (req.user.role !== "STUDENT")
-    return res.status(403).json("Only students allowed");
-
-  await Attendance.create({
-    studentId: req.user.id,
-    facultyId: decoded.facultyId
-  });
-
-  res.json("Attendance marked successfully");
+    res.json({
+      success: true,
+      token: session.token,
+      expiresIn: 45
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "QR generation failed"
+    });
+  }
 };

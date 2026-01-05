@@ -1,8 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const auth = require("../middleware/authMiddleware");
-const { getFacultyAttendance } = require("../controllers/facultyController");
+const faculty = require("../controllers/facultyController");
 
-router.get("/attendance", auth, getFacultyAttendance);
+router.post("/qr/start", auth, faculty.startQrSession);
+router.post("/qr/end", auth, faculty.endQrSession);
+router.post("/qr/scan", auth, faculty.scanQr);
+router.get("/attendance", auth, faculty.getFacultyAttendance);
 
 module.exports = router;

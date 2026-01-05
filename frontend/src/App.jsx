@@ -1,19 +1,48 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
-import StudentDashboard from "./pages/student/StudentDashboard";
+
 import FacultyDashboard from "./pages/faculty/FacultyDashboard";
 import HodDashboard from "./pages/hod/HodDashboard";
-import PrincipalDashboard from "./pages/principal/PrincipalDashboard";
+import StudentDashboard from "./pages/student/StudentDashboard";
+
+import ProtectedRoute from "./components/ProtectedRoute";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* PUBLIC */}
         <Route path="/" element={<Login />} />
-        <Route path="/student" element={<StudentDashboard />} />
-        <Route path="/faculty" element={<FacultyDashboard />} />
-        <Route path="/hod" element={<HodDashboard />} />
-        <Route path="/principal" element={<PrincipalDashboard />} />
+
+        {/* FACULTY */}
+        <Route
+          path="/faculty"
+          element={
+            <ProtectedRoute role="FACULTY">
+              <FacultyDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* HOD */}
+        <Route
+          path="/hod"
+          element={
+            <ProtectedRoute role="HOD">
+              <HodDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ✅ STUDENT (MISSING BEFORE) */}
+        <Route
+          path="/student"
+          element={
+            <ProtectedRoute role="STUDENT">
+              <StudentDashboard />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

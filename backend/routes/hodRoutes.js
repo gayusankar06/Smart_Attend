@@ -1,13 +1,16 @@
 const express = require("express");
 const router = express.Router();
 
-const { getDepartmentAttendance } = require("../controllers/hodController");
-const authMiddleware = require("../middleware/authMiddleware");
+const {
+  getHodDashboard,
+  counselStudent,
+} = require("../controllers/hodController");
 
-router.get(
-  "/attendance",
-  authMiddleware(["HOD"]),
-  getDepartmentAttendance
-);
+// SAFETY LOG (REMOVE LATER)
+console.log("getHodDashboard:", typeof getHodDashboard);
+console.log("counselStudent:", typeof counselStudent);
+
+router.get("/dashboard", getHodDashboard);
+router.post("/counsel", counselStudent);
 
 module.exports = router;
