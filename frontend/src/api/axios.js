@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const instance = axios.create({
-  baseURL: "https://smart-attend-2.onrender.com"
+  baseURL: "https://smartattend-qpr3.onrender.com/"
 });
 
 instance.interceptors.request.use((config) => {
