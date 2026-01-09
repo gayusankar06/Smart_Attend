@@ -1,12 +1,6 @@
 import { useEffect, useState } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 
-/*
-  ===============================
-  FACULTY DASHBOARD (SAFE VERSION)
-  ===============================
-*/
-
 export default function FacultyDashboard() {
   const [active, setActive] = useState(false);
   const [qrToken, setQrToken] = useState("");
@@ -14,14 +8,8 @@ export default function FacultyDashboard() {
 
   /* ================= AUTH GUARD ================= */
   useEffect(() => {
-    const userStr = localStorage.getItem("user");
-    if (!userStr) {
-      window.location.href = "/";
-      return;
-    }
-
-    const user = JSON.parse(userStr);
-    if (user.role !== "FACULTY") {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user || user.role !== "FACULTY") {
       window.location.href = "/";
     }
   }, []);
@@ -33,7 +21,7 @@ export default function FacultyDashboard() {
     const timer = setInterval(() => {
       setSeconds((s) => {
         if (s <= 1) {
-          regenerateQr();
+          endSession();
           return 45;
         }
         return s - 1;
@@ -43,34 +31,31 @@ export default function FacultyDashboard() {
     return () => clearInterval(timer);
   }, [active]);
 
-  /* ================= QR ================= */
-  const startSession = () => {
-    regenerateQr();
+  /* ================= START SESSION ================= */
+  const startSession = async () => {
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(
+      "http://localhost:5000/api/faculty/qr/start",
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    const data = await res.json();
+    setQrToken(data.qrToken);
     setActive(true);
     setSeconds(45);
   };
 
-  const regenerateQr = () => {
-    // TEMP token (replace with backend later)
-    const token = `QR-${Date.now()}-${Math.random()
-      .toString(36)
-      .substring(2, 8)}`;
-    setQrToken(token);
-  };
-
+  /* ================= END SESSION ================= */
   const endSession = () => {
     setActive(false);
     setQrToken("");
     setSeconds(45);
   };
 
-  /* ================= LOGOUT ================= */
-  const handleLogout = () => {
-    localStorage.clear();
-    window.location.href = "/";
-  };
-
-  /* ================= UI ================= */
   return (
     <div className="min-h-screen bg-gray-100">
       {/* HEADER */}
@@ -78,9 +63,11 @@ export default function FacultyDashboard() {
         <h1 className="text-white font-bold text-xl">
           👁 Faculty Dashboard
         </h1>
-
         <button
-          onClick={handleLogout}
+          onClick={() => {
+            localStorage.clear();
+            window.location.href = "/";
+          }}
           className="bg-white text-yellow-600 px-5 py-2 rounded-lg font-semibold"
         >
           Logout
@@ -98,7 +85,7 @@ export default function FacultyDashboard() {
             onClick={startSession}
             className="bg-yellow-400 text-white px-6 py-2 rounded-lg font-semibold"
           >
-            Start New Session
+            Start Session
           </button>
         ) : (
           <button
@@ -113,18 +100,11 @@ export default function FacultyDashboard() {
       {/* QR DISPLAY */}
       {active && (
         <div className="bg-white mx-8 mt-6 p-6 rounded-xl shadow text-center">
-          <div className="border-4 border-yellow-300 inline-block p-4 rounded bg-white">
-            <QRCodeCanvas value={qrToken} size={220} />
-          </div>
-
+          <QRCodeCanvas value={qrToken} size={220} />
           <p className="mt-4 text-gray-600">
-            QR Code expires in{" "}
-            <span className="text-red-500 font-bold">
-              {seconds}
-            </span>{" "}
-            seconds
+            QR expires in{" "}
+            <span className="text-red-500 font-bold">{seconds}</span> seconds
           </p>
-
           <p className="mt-2 text-xs text-gray-400 break-all">
             Token: {qrToken}
           </p>
@@ -132,28 +112,42 @@ export default function FacultyDashboard() {
       )}
 
       {/* STATS */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mx-8 mt-8">
-        <StatCard value="79%" label="Avg Attendance" />
-        <StatCard value="77%" label="Avg Marks" />
-        <StatCard value="60" label="Total Students" />
-        <StatCard value="12" label="At Risk" />
-      </div>
+      <section className="grid grid-cols-1 md:grid-cols-4 gap-6 mx-8 mt-8">
+        <StatCard value="60" label="Expected" />
+        <StatCard value="52" label="Present" />
+        <StatCard value="8" label="Pending" />
+        <StatCard value="87%" label="Avg Attendance" />
+      </section>
 
-      {/* STUDENT OVERVIEW */}
-      <div className="bg-white mx-8 mt-8 p-6 rounded-xl shadow">
+      {/* SESSION SUMMARY */}
+      <section className="bg-white mx-8 mt-10 p-6 rounded-xl shadow">
         <h2 className="text-yellow-500 font-bold mb-4">
-          Student Overview
+          📊 Session Summary
         </h2>
 
-        <p className="text-gray-600">
-          Attendance records will appear here in real-time.
-        </p>
-      </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+          <Summary value="52" label="Students Present" />
+          <Summary value="8" label="Students Absent" />
+          <Summary value="87%" label="Session Attendance" />
+        </div>
+      </section>
+
+      {/* FACULTY INSIGHTS */}
+      <section className="bg-white mx-8 mt-10 p-6 rounded-xl shadow">
+        <h2 className="text-yellow-500 font-bold mb-4">
+          🤖 Faculty Insights
+        </h2>
+
+        <ul className="list-disc ml-6 text-gray-700 space-y-2">
+          <li>Morning sessions show higher participation</li>
+          <li>QR attendance reduces proxy attendance</li>
+          <li>Early identification helps at-risk students</li>
+        </ul>
+      </section>
     </div>
   );
 }
 
-/* ================= STAT CARD ================= */
 function StatCard({ value, label }) {
   return (
     <div className="bg-white p-6 rounded-xl shadow text-center">
@@ -163,3 +157,11 @@ function StatCard({ value, label }) {
   );
 }
 
+function Summary({ value, label }) {
+  return (
+    <div>
+      <div className="text-2xl font-bold">{value}</div>
+      <div className="text-gray-600">{label}</div>
+    </div>
+  );
+}

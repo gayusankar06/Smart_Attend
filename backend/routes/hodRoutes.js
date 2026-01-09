@@ -1,16 +1,15 @@
 const express = require("express");
 const router = express.Router();
 
+const auth = require("../middleware/authMiddleware"); // ✅ THIS WAS MISSING
+
 const {
   getHodDashboard,
   counselStudent,
 } = require("../controllers/hodController");
 
-// SAFETY LOG (REMOVE LATER)
-console.log("getHodDashboard:", typeof getHodDashboard);
-console.log("counselStudent:", typeof counselStudent);
-
-router.get("/dashboard", getHodDashboard);
-router.post("/counsel", counselStudent);
+// HOD protected routes
+router.get("/dashboard", auth("HOD"), getHodDashboard);
+router.post("/counsel", auth("HOD"), counselStudent);
 
 module.exports = router;

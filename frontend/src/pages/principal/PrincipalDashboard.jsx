@@ -1,70 +1,118 @@
-import { useEffect, useState } from "react";
-import { getPrincipalAttendance } from "../../api/principalApi";
+import { useEffect } from "react";
 
 export default function PrincipalDashboard() {
-  const [records, setRecords] = useState([]);
-
   useEffect(() => {
-    loadData();
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user || user.role !== "PRINCIPAL") {
+      window.location.href = "/";
+    }
   }, []);
 
-  const loadData = async () => {
-    const res = await getPrincipalAttendance();
-    setRecords(res.data);
+  /* ================= WORKING MODE DATA ================= */
+  const stats = {
+    totalStudents: 1250,
+    attendance: "86%",
+    atRisk: 45,
+    avgMarks: "82%",
   };
 
+  const departments = [
+    { dept: "CSE", att: "79%", risk: 2, total: 4, status: "Good" },
+    { dept: "ECE", att: "90%", risk: 0, total: 2, status: "Excellent" },
+    { dept: "EEE", att: "85%", risk: 0, total: 1, status: "Excellent" },
+    { dept: "IT", att: "91%", risk: 0, total: 1, status: "Excellent" },
+    { dept: "MECH", att: "78%", risk: 0, total: 1, status: "Good" },
+  ];
+
+  const principalInsights = [
+    "Overall attendance has improved by 4% compared to last semester",
+    "CSE and IT departments show strong academic engagement",
+    "Early intervention reduced at-risk students by 12%",
+    "Departments with more lab sessions show better attendance",
+    "Predictive trend suggests improvement before internals",
+  ];
+
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <h1 className="text-2xl font-bold mb-6">👑 Principal Dashboard</h1>
+    <div className="min-h-screen bg-gray-100">
+      {/* HEADER */}
+      <header className="bg-yellow-400 px-8 py-4 flex justify-between items-center shadow">
+        <h1 className="text-white font-bold text-xl">
+          👑 Principal Dashboard
+        </h1>
+        <button
+          onClick={() => {
+            localStorage.clear();
+            window.location.href = "/";
+          }}
+          className="bg-white text-yellow-600 px-5 py-2 rounded-lg font-semibold"
+        >
+          Logout
+        </button>
+      </header>
+
+      {/* STATS */}
+      <section className="grid grid-cols-1 md:grid-cols-4 gap-6 px-8 mt-8">
+        <StatCard value={stats.totalStudents} label="Total Students" />
+        <StatCard value={stats.attendance} label="College Attendance" />
+        <StatCard value={stats.atRisk} label="At Risk Students" />
+        <StatCard value={stats.avgMarks} label="Avg Marks" />
+      </section>
 
       {/* DEPARTMENT PERFORMANCE */}
-      <div className="bg-white p-4 rounded shadow mb-6">
-        <h2 className="font-semibold mb-4">Department Performance</h2>
+      <section className="bg-white mx-8 mt-10 p-6 rounded-xl shadow">
+        <h2 className="text-yellow-500 font-bold mb-4">
+          Department Performance
+        </h2>
 
-        {records.length === 0 && <p>No data available</p>}
-
-        <table className="w-full border">
-          <thead className="bg-gray-200">
+        <table className="w-full">
+          <thead className="bg-yellow-50">
             <tr>
-              <th className="p-2 border">Department</th>
-              <th className="p-2 border">Avg Attendance</th>
-              <th className="p-2 border">At-Risk Students</th>
-              <th className="p-2 border">Total Students</th>
-              <th className="p-2 border">Status</th>
+              <th className="p-3 text-left">Department</th>
+              <th className="p-3">Avg Attendance</th>
+              <th className="p-3">At Risk</th>
+              <th className="p-3">Total Students</th>
+              <th className="p-3">Status</th>
             </tr>
           </thead>
           <tbody>
-            {records.map((_, i) => {
-              const avg = Math.floor(Math.random() * 30) + 60;
-              const atRisk = Math.floor(Math.random() * 10);
-              const total = Math.floor(Math.random() * 50) + 30;
-
-              return (
-                <tr key={i}>
-                  <td className="p-2 border">Department {i + 1}</td>
-                  <td className="p-2 border">{avg}%</td>
-                  <td className="p-2 border">{atRisk}</td>
-                  <td className="p-2 border">{total}</td>
-                  <td className="p-2 border">
-                    {avg > 75 ? "Good" : "Needs Improvement"}
-                  </td>
-                </tr>
-              );
-            })}
+            {departments.map((d) => (
+              <tr key={d.dept} className="border-t">
+                <td className="p-3 font-semibold">{d.dept}</td>
+                <td className="p-3 text-center">{d.att}</td>
+                <td className="p-3 text-center">{d.risk}</td>
+                <td className="p-3 text-center">{d.total}</td>
+                <td className="p-3 text-center">
+                  <span className="px-3 py-1 rounded bg-green-100 text-green-700 text-sm">
+                    {d.status}
+                  </span>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
-      </div>
+      </section>
 
-      {/* PREDICTION INSIGHTS */}
-      <div className="bg-white p-4 rounded shadow">
-        <h2 className="font-semibold mb-4">Prediction Insights</h2>
+      {/* INSIGHTS */}
+      <section className="bg-white mx-8 mt-10 p-6 rounded-xl shadow">
+        <h2 className="text-yellow-500 font-bold mb-4">
+          📊 Institutional Insights & Predictions
+        </h2>
 
-        <ul className="list-disc pl-6 space-y-2">
-          <li>📉 Attendance drop predicted in 2 departments</li>
-          <li>⚠️ 18 students likely to become at-risk next month</li>
-          <li>📈 Overall attendance trend is stable</li>
+        <ul className="list-disc ml-6 space-y-2 text-gray-700">
+          {principalInsights.map((i, idx) => (
+            <li key={idx}>{i}</li>
+          ))}
         </ul>
-      </div>
+      </section>
+    </div>
+  );
+}
+
+function StatCard({ value, label }) {
+  return (
+    <div className="bg-white rounded-xl shadow p-6 text-center">
+      <div className="text-3xl font-bold">{value}</div>
+      <div className="text-gray-600 mt-1">{label}</div>
     </div>
   );
 }

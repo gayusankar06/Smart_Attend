@@ -1,43 +1,31 @@
-const QrSession = require("../models/QrSession");
+const jwt = require("jsonwebtoken");
 const Attendance = require("../models/Attendance");
 
-exports.markAttendance = async (req, res) => {
+const markAttendance = async (req, res) => {
   try {
-    const { qrToken } = req.body;
+    if (req.user.role !== "STUDENT") {
+      return res.status(403).json({ message: "Access denied" });
+    }
 
+    const { qrToken } = req.body;
     if (!qrToken) {
       return res.status(400).json({ message: "QR token required" });
     }
 
-    const session = await QrSession.findOne({
-      token: qrToken,
-      isActive: true,
-      expiresAt: { $gt: new Date() }
-    });
-
-    if (!session) {
-      return res.status(400).json({ message: "QR expired or invalid" });
-    }
+    const decoded = jwt.verify(qrToken, process.env.JWT_SECRET);
 
     await Attendance.create({
       studentId: req.user.id,
-      facultyId: session.facultyId,
-      sessionToken: qrToken
+      facultyId: decoded.facultyId,
+      subject: "Cyber Security",
+      sessionToken: qrToken,
     });
 
-    res.json({
-      success: true,
-      message: "Attendance marked successfully"
-    });
+    res.json({ success: true, message: "Attendance marked" });
   } catch (err) {
-    if (err.code === 11000) {
-      return res.status(409).json({
-        message: "Attendance already marked"
-      });
-    }
-
-    res.status(500).json({
-      message: "Attendance marking failed"
-    });
+    console.error("ATTENDANCE ERROR:", err);
+    res.status(400).json({ message: "QR expired or invalid" });
   }
 };
+
+module.exports = { markAttendance };

@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import FacultyDashboard from "./pages/faculty/FacultyDashboard";
 import HodDashboard from "./pages/hod/HodDashboard";
 import StudentDashboard from "./pages/student/StudentDashboard";
+import PrincipalDashboard from "./pages/principal/PrincipalDashboard";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -33,7 +34,14 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-
+          <Route
+  path="/principal"
+  element={
+    <ProtectedRoute role="PRINCIPAL">
+      <PrincipalDashboard />
+    </ProtectedRoute>
+  }
+/>
         {/* ✅ STUDENT (MISSING BEFORE) */}
         <Route
           path="/student"
